@@ -1,6 +1,8 @@
 import { useEffect } from "react"
 import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 import type { EstimatorFormData, FireIntensity } from "../types"
+import { estimatorSchema } from "../utils/validation"
 
 interface EstimatorFormProps {
   onFormChange: (data: EstimatorFormData) => void
@@ -14,6 +16,7 @@ const INTENSITY_OPTIONS: { value: FireIntensity; label: string }[] = [
 
 export function EstimatorForm({ onFormChange }: EstimatorFormProps) {
   const { register, watch } = useForm<EstimatorFormData>({
+    resolver: zodResolver(estimatorSchema),
     defaultValues: {
       peopleCount: 2,
       duration: 3,
