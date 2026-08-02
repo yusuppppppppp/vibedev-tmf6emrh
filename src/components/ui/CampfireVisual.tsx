@@ -5,210 +5,49 @@ interface CampfireVisualProps {
   logCount: number
 }
 
-const INTENSITY_CONFIG = {
-  cozy: {
-    flameHeight: 30,
-    flameWidth: 20,
-    flameCount: 3,
-    sparkCount: 2,
-    colors: { outer: "#f97316", inner: "#fbbf24", core: "#fef08a" },
-  },
-  medium: {
-    flameHeight: 45,
-    flameWidth: 25,
-    flameCount: 5,
-    sparkCount: 4,
-    colors: { outer: "#ef4444", inner: "#f97316", core: "#fbbf24" },
-  },
-  roaring: {
-    flameHeight: 60,
-    flameWidth: 35,
-    flameCount: 7,
-    sparkCount: 6,
-    colors: { outer: "#dc2626", inner: "#ef4444", core: "#f97316" },
-  },
+const INTENSITY_CONFIG: Record<FireIntensity, { flameHeight: number; flameWidth: number; flameCount: number; sparkCount: number; colors: [string, string, string] }> = {
+  cozy: { flameHeight: 30, flameWidth: 20, flameCount: 3, sparkCount: 2, colors: ["#fef08a", "#fbbf24", "#f97316"] },
+  medium: { flameHeight: 45, flameWidth: 25, flameCount: 5, sparkCount: 4, colors: ["#fbbf24", "#f97316", "#ef4444"] },
+  roaring: { flameHeight: 60, flameWidth: 35, flameCount: 7, sparkCount: 6, colors: ["#f97316", "#ef4444", "#dc2626"] },
 }
 
-const FLAME_VARIATIONS = [
-  { heightMult: 0.85, widthMult: 0.7 },
-  { heightMult: 1.0, widthMult: 0.9 },
-  { heightMult: 0.95, widthMult: 1.0 },
-  { heightMult: 0.9, widthMult: 0.8 },
-  { heightMult: 1.05, widthMult: 0.95 },
-  { heightMult: 0.88, widthMult: 0.85 },
-  { heightMult: 1.02, widthMult: 0.75 },
-]
-
-const SPARK_POSITIONS = [
-  { x: 90, y: 45 },
-  { x: 110, y: 42 },
-  { x: 95, y: 48 },
-  { x: 105, y: 40 },
-  { x: 88, y: 50 },
-  { x: 112, y: 44 },
-]
-
-const LOG_POSITIONS = [
-  { x: 88, y: 120, rotation: -45 },
-  { x: 100, y: 122, rotation: -15 },
-  { x: 112, y: 120, rotation: 15 },
-  { x: 85, y: 124, rotation: -60 },
-  { x: 115, y: 124, rotation: 60 },
-  { x: 95, y: 126, rotation: -30 },
-  { x: 105, y: 126, rotation: 30 },
-  { x: 100, y: 128, rotation: 0 },
-]
-
-function Flame({
-  x,
-  height,
-  width,
-  color,
-  delay,
-}: {
-  x: number
-  height: number
-  width: number
-  color: string
-  delay: number
-}) {
-  return (
-    <ellipse
-      cx={x}
-      cy={100 - height / 2}
-      rx={width / 2}
-      ry={height / 2}
-      fill={color}
-      opacity={0.9}
-      style={{
-        animation: `flicker 1.5s ease-in-out ${delay}s infinite alternate`,
-      }}
-    />
-  )
-}
-
-function Spark({
-  x,
-  y,
-  delay,
-}: {
-  x: number
-  y: number
-  delay: number
-}) {
-  return (
-    <circle
-      cx={x}
-      cy={y}
-      r={2}
-      fill="#fbbf24"
-      style={{
-        animation: `spark 2s ease-out ${delay}s infinite`,
-      }}
-    />
-  )
-}
+const FLAME_MULTS = [[0.85, 0.7], [1, 0.9], [0.95, 1], [0.9, 0.8], [1.05, 0.95], [0.88, 0.85], [1.02, 0.75]]
+const SPARK_POS = [[90, 45], [110, 42], [95, 48], [105, 40], [88, 50], [112, 44]]
+const LOG_POS = [[88, 120, -45], [100, 122, -15], [112, 120, 15], [85, 124, -60], [115, 124, 60], [95, 126, -30], [105, 126, 30], [100, 128, 0]]
 
 export function CampfireVisual({ intensity, logCount }: CampfireVisualProps) {
-  const config = INTENSITY_CONFIG[intensity]
-  const displayLogs = Math.min(logCount, 8)
+  const c = INTENSITY_CONFIG[intensity]
+  const n = Math.min(logCount, 8)
 
   return (
     <div className="relative w-full max-w-xs mx-auto">
       <style>{`
-        @keyframes flicker {
-          0% { transform: scaleY(1) scaleX(1); }
-          100% { transform: scaleY(1.1) scaleX(0.95); }
-        }
-        @keyframes spark {
-          0% { opacity: 1; transform: translateY(0); }
-          100% { opacity: 0; transform: translateY(-40px); }
-        }
-        @keyframes smoke {
-          0% { opacity: 0.3; transform: translateY(0) scale(1); }
-          100% { opacity: 0; transform: translateY(-20px) scale(1.5); }
-        }
+        @keyframes flicker { 0%{transform:scaleY(1) scaleX(1)} 100%{transform:scaleY(1.1) scaleX(.95)} }
+        @keyframes spark { 0%{opacity:1;transform:translateY(0)} 100%{opacity:0;transform:translateY(-40px)} }
+        @keyframes smoke { 0%{opacity:.3;transform:translateY(0) scale(1)} 100%{opacity:0;transform:translateY(-20px) scale(1.5)} }
       `}</style>
-
-      <svg
-        viewBox="0 0 200 150"
-        className="w-full h-auto"
-        role="img"
-        aria-label={`Campfire with ${intensity} intensity and approximately ${logCount} logs`}
-      >
-        {/* Ground */}
-        <ellipse cx="100" cy="135" rx="70" ry="10" fill="#78716c" opacity="0.3" />
-
-        {/* Smoke */}
-        <circle
-          cx="100"
-          cy="30"
-          r="8"
-          fill="#9ca3af"
-          opacity="0.2"
-          style={{ animation: "smoke 3s ease-out infinite" }}
-        />
-
-        {/* Flames */}
+      <svg viewBox="0 0 200 150" className="w-full h-auto" role="img" aria-label={`Campfire with ${intensity} intensity and approximately ${logCount} logs`}>
+        <ellipse cx="100" cy="135" rx="70" ry="10" fill="#78716c" opacity=".3" />
+        <circle cx="100" cy="30" r="8" fill="#9ca3af" opacity=".2" style={{ animation: "smoke 3s ease-out infinite" }} />
         <g>
-          {Array.from({ length: config.flameCount }).map((_, i) => {
-            const offset = (i - (config.flameCount - 1) / 2) * 12
-            const variation = FLAME_VARIATIONS[i % FLAME_VARIATIONS.length]
-            const heightVariation = config.flameHeight * variation.heightMult
-            return (
-              <Flame
-                key={`flame-${i}`}
-                x={100 + offset}
-                height={heightVariation}
-                width={config.flameWidth * variation.widthMult}
-                color={
-                  i % 3 === 0
-                    ? config.colors.core
-                    : i % 3 === 1
-                      ? config.colors.inner
-                      : config.colors.outer
-                }
-                delay={i * 0.1}
-              />
-            )
+          {Array.from({ length: c.flameCount }).map((_, i) => {
+            const off = (i - (c.flameCount - 1) / 2) * 12
+            const [hm, wm] = FLAME_MULTS[i % FLAME_MULTS.length]
+            return <ellipse key={i} cx={100 + off} cy={100 - c.flameHeight * hm / 2} rx={c.flameWidth * wm / 2} ry={c.flameHeight * hm / 2} fill={c.colors[i % 3]} opacity=".9" style={{ animation: `flicker 1.5s ease-in-out ${i * .1}s infinite alternate` }} />
           })}
         </g>
-
-        {/* Sparks */}
         <g>
-          {Array.from({ length: config.sparkCount }).map((_, i) => {
-            const pos = SPARK_POSITIONS[i % SPARK_POSITIONS.length]
-            return (
-              <Spark
-                key={`spark-${i}`}
-                x={pos.x}
-                y={pos.y}
-                delay={i * 0.3}
-              />
-            )
+          {Array.from({ length: c.sparkCount }).map((_, i) => {
+            const [x, y] = SPARK_POS[i % SPARK_POS.length]
+            return <circle key={i} cx={x} cy={y} r={2} fill="#fbbf24" style={{ animation: `spark 2s ease-out ${i * .3}s infinite` }} />
           })}
         </g>
-
-        {/* Logs */}
         <g>
-          {Array.from({ length: displayLogs }).map((_, i) => {
-            const pos = LOG_POSITIONS[i % LOG_POSITIONS.length]
-            return (
-              <rect
-                key={`log-${i}`}
-                x={pos.x - 12}
-                y={pos.y}
-                width={24}
-                height={6}
-                rx={3}
-                fill="#78716c"
-                transform={`rotate(${pos.rotation} ${pos.x} ${pos.y + 3})`}
-              />
-            )
+          {Array.from({ length: n }).map((_, i) => {
+            const [x, y, rot] = LOG_POS[i % LOG_POS.length]
+            return <rect key={i} x={x - 12} y={y} width={24} height={6} rx={3} fill="#78716c" transform={`rotate(${rot} ${x} ${y + 3})`} />
           })}
         </g>
-
-        {/* Fire bed */}
         <ellipse cx="100" cy="128" rx="40" ry="6" fill="#44403c" />
       </svg>
     </div>
