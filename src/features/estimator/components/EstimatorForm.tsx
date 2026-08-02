@@ -14,14 +14,16 @@ const INTENSITY_OPTIONS: { value: FireIntensity; label: string }[] = [
   { value: "roaring", label: "Roaring" },
 ]
 
+const DEFAULT_VALUES: EstimatorFormData = {
+  peopleCount: 2,
+  duration: 3,
+  intensity: "medium",
+}
+
 export function EstimatorForm({ onFormChange }: EstimatorFormProps) {
-  const { register, watch } = useForm<EstimatorFormData>({
+  const { register, watch, reset } = useForm<EstimatorFormData>({
     resolver: zodResolver(estimatorSchema),
-    defaultValues: {
-      peopleCount: 2,
-      duration: 3,
-      intensity: "medium",
-    },
+    defaultValues: DEFAULT_VALUES,
   })
 
   const peopleCount = watch("peopleCount")
@@ -31,6 +33,11 @@ export function EstimatorForm({ onFormChange }: EstimatorFormProps) {
   useEffect(() => {
     onFormChange({ peopleCount, duration, intensity })
   }, [peopleCount, duration, intensity, onFormChange])
+
+  const handleReset = () => {
+    reset(DEFAULT_VALUES)
+    onFormChange(DEFAULT_VALUES)
+  }
 
   return (
     <form className="space-y-6">
@@ -105,6 +112,14 @@ export function EstimatorForm({ onFormChange }: EstimatorFormProps) {
           </div>
         </div>
       </fieldset>
+
+      <button
+        type="button"
+        onClick={handleReset}
+        className="w-full rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+      >
+        Reset
+      </button>
     </form>
   )
 }
