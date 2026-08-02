@@ -40,7 +40,7 @@ export function EstimatorForm({ onFormChange }: EstimatorFormProps) {
   }
 
   return (
-    <form className="space-y-6">
+    <form className="space-y-6" aria-label="Campfire estimation form">
       <fieldset className="space-y-4">
         <legend className="text-sm font-medium text-foreground">
           Campfire Settings
@@ -59,8 +59,13 @@ export function EstimatorForm({ onFormChange }: EstimatorFormProps) {
             type="number"
             min={1}
             max={20}
+            aria-describedby="peopleCount-hint"
+            aria-required="true"
             className="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
           />
+          <p id="peopleCount-hint" className="text-xs text-muted-foreground">
+            Enter between 1 and 20 people
+          </p>
         </div>
 
         <div className="space-y-2">
@@ -77,20 +82,34 @@ export function EstimatorForm({ onFormChange }: EstimatorFormProps) {
             min={1}
             max={8}
             step={1}
+            aria-describedby="duration-value"
+            aria-valuemin={1}
+            aria-valuemax={8}
+            aria-valuenow={duration}
             className="w-full accent-primary"
           />
-          <div className="flex justify-between text-xs text-muted-foreground">
+          <div className="flex justify-between text-xs text-muted-foreground" aria-hidden="true">
             <span>1h</span>
             <span className="font-medium text-foreground">{duration}h</span>
             <span>8h</span>
           </div>
+          <p id="duration-value" className="sr-only">
+            Selected duration: {duration} hours
+          </p>
         </div>
 
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-foreground">
+          <label
+            id="intensity-label"
+            className="block text-sm font-medium text-foreground"
+          >
             Fire Intensity
           </label>
-          <div className="flex gap-2">
+          <div
+            className="flex gap-2"
+            role="radiogroup"
+            aria-labelledby="intensity-label"
+          >
             {INTENSITY_OPTIONS.map(({ value, label }) => (
               <label
                 key={value}
@@ -105,6 +124,7 @@ export function EstimatorForm({ onFormChange }: EstimatorFormProps) {
                   type="radio"
                   value={value}
                   className="sr-only"
+                  aria-label={`${label} intensity`}
                 />
                 {label}
               </label>
@@ -116,6 +136,7 @@ export function EstimatorForm({ onFormChange }: EstimatorFormProps) {
       <button
         type="button"
         onClick={handleReset}
+        aria-label="Reset form to default values"
         className="w-full rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
       >
         Reset
