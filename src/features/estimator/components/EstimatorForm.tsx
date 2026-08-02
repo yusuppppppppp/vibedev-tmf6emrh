@@ -39,8 +39,12 @@ export function EstimatorForm({ onFormChange }: EstimatorFormProps) {
     onFormChange(DEFAULT_VALUES)
   }
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+  }
+
   return (
-    <form className="space-y-6" aria-label="Campfire estimation form">
+    <form onSubmit={handleSubmit} className="space-y-6" aria-label="Campfire estimation form">
       <fieldset className="space-y-4">
         <legend className="text-sm font-medium text-foreground">
           Campfire Settings
